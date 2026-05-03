@@ -1,9 +1,9 @@
 from rest_framework import status, views
 from rest_framework.response import Response
 
-from github_search.clients import github_client
 from github_search.clients.github import GitHubAPIError
 from github_search.serializers import ITEM_SERIALIZERS, SearchResponseSerializer, SearchSerializer
+from github_search.services import github_search_service
 
 
 class SearchView(views.APIView):
@@ -14,7 +14,7 @@ class SearchView(views.APIView):
         data = serializer.validated_data
 
         try:
-            result = github_client.search(
+            result = github_search_service.search(
                 search_type=data["type"],
                 query=data["text"],
                 per_page=data["per_page"],
