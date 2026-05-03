@@ -4,17 +4,21 @@ import requests
 from github_search.choices import SearchType
 
 
+class GitHubAPIError(Exception):
+    def __init__(self, status_code: int, message: str):
+        self.status_code = status_code
+        super().__init__(f"GitHub API error {status_code}: {message}")
+
+
 class GitHubClient:
     BASE_URL = "https://api.github.com/search"
-    TIMEOUT = 5
+    TIMEOUT = 15
 
     def __init__(self, token: str | None = None):
         self.token = token or getattr(settings, "GITHUB_TOKEN", None)
 
     def _get_headers(self) -> dict:
-        headers = {
-            "Accept": "application/vnd.github+json",
-        }
+        headers = {"Accept": "application/vnd.github+json"}
         if self.token:
             headers["Authorization"] = f"Bearer {self.token}"
         return headers
@@ -24,36 +28,26 @@ class GitHubClient:
             raise ValueError(f"Unsupported search type: {search_type}")
         return f"{self.BASE_URL}/{search_type}"
 
-    def search(self, search_type: SearchType, query: str, per_page: int = 10) -> dict:
-        """
-        Generic search method.
-        """
+    def search(self, search_type: SearchType, query: str, per_page: int = 10, page: int = 1) -> dict:
         url = self._build_url(search_type)
-
-        params = {
-            "q": query,
-            "per_page": per_page,
-        }
 
         response = requests.get(
             url,
             headers=self._get_headers(),
-            params=params,
+            params={"q": query, "per_page": per_page, "page": page},
             timeout=self.TIMEOUT,
         )
 
-        if response.status_code != 200:
-            raise Exception(
-                f"GitHub API error: {response.status_code} - {response.text}"
-            )
+        if not response.ok:
+            raise GitHubAPIError(response.status_code, response.text)
 
         return response.json()
 
-    def search_users(self, query: str) -> dict:
-        return self.search(SearchType.USERS, query)
+    def search_users(self, query: str, per_page: int = 10, page: int = 1) -> dict:
+        return self.search(SearchType.USERS, query, per_page=per_page, page=page)
 
-    def search_repositories(self, query: str) -> dict:
-        return self.search(SearchType.REPOSITORIES, query)
+    def search_repositories(self, query: str, per_page: int = 10, page: int = 1) -> dict:
+        return self.search(SearchType.REPOSITORIES, query, per_page=per_page, page=page)
 
-    def search_issues(self, query: str) -> dict:
-        return self.search(SearchType.ISSUES, query)
+    def search_issues(self, query: str, per_page: int = 10, page: int = 1) -> dict:
+        return self.search(SearchType.ISSUES, query, per_page=per_page, page=page)
