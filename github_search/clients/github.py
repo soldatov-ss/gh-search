@@ -42,12 +42,3 @@ class GitHubClient:
             raise GitHubAPIError(response.status_code, response.text)
 
         return response.json()
-
-    def search_users(self, query: str, per_page: int = 10, page: int = 1) -> dict:
-        return self.search(SearchType.USERS, query, per_page=per_page, page=page)
-
-    def search_repositories(self, query: str, per_page: int = 10, page: int = 1) -> dict:
-        return self.search(SearchType.REPOSITORIES, query, per_page=per_page, page=page)
-
-    def search_issues(self, query: str, per_page: int = 10, page: int = 1) -> dict:
-        return self.search(SearchType.ISSUES, query, per_page=per_page, page=page)
