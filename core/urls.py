@@ -18,6 +18,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
+from github_search.views import ClearCacheView
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path(
@@ -26,6 +28,7 @@ urlpatterns = [
             [
                 path("search/", include("github_search.urls")),
                 path("users/", include("users.urls")),
+                path("clear-cache/", ClearCacheView.as_view(), name="clear-cache"),
             ]
         ),
     ),

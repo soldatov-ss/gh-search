@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from rest_framework import status, views
 from rest_framework.response import Response
 
@@ -32,3 +33,9 @@ class SearchView(views.APIView):
             "items": item_serializer.data,
         })
         return Response(response_serializer.data)
+
+
+class ClearCacheView(views.APIView):
+    def post(self, request, *args, **kwargs):
+        cache.clear()
+        return Response(status=status.HTTP_204_NO_CONTENT)
